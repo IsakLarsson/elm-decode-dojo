@@ -119,3 +119,132 @@ type alias User =
 userDecoder : Decode.Decoder User
 userDecoder =
     Decode.fail "Implement User decoder"
+
+
+
+--LEVEL 7 Nested Object with optional fields
+--JSON:
+-- {
+--   "playlistName": "Favorites",
+--   "songs": [
+--     { "title": "Song A", "duration": 180, "artist": "Artist 1" },
+--     { "title": "Song B", "duration": 200, "artist": null }
+--   ]
+-- }
+
+
+type alias SongWithOptionalArtist =
+    { title : String, duration : Int, artist : Maybe String }
+
+
+type alias PlayListWithOptionalArtist =
+    { playListName : String, songs : List SongWithOptionalArtist }
+
+
+playListWithOptionalArtistsDecoder : Decode.Decoder PlayListWithOptionalArtist
+playListWithOptionalArtistsDecoder =
+    Decode.fail "Implement playListWithOptionalArtistsDecoder"
+
+
+
+-- LEVEL 9: One-Of Nested Structure
+-- JSON:
+-- {
+--   "category": "Books",
+--   "items": [
+--     {
+--       "title": "Book 1",
+--       "author": {
+--         "name": "Author A",
+--         "born": 1975
+--       },
+--       "tags": ["Fiction", "Drama"]
+--     },
+--     {
+--       "title": "Book 2",
+--       "author": {
+--         "name": "Author B",
+--         "born": null
+--       },
+--       "tags": []
+--     }
+--   ]
+-- }
+
+
+type alias AuthorWithOptionalBirthYear =
+    { name : String
+    , born : Maybe Int
+    }
+
+
+type alias BookItem =
+    { title : String
+    , author : AuthorWithOptionalBirthYear
+    , tags : List String
+    }
+
+
+type alias Category =
+    { category : String
+    , items : List BookItem
+    }
+
+
+categoryDecoder : Decode.Decoder Category
+categoryDecoder =
+    Decode.fail "implement Category decoder"
+
+
+
+-- JSON:
+-- {
+--   "event": "Conference",
+--   "details": {
+--     "date": "2025-12-01",
+--     "location": {
+--       "city": "New York",
+--       "country": "USA"
+--     }
+--   },
+--   "attendees": [
+--     {
+--       "name": "Alice",
+--       "email": "alice@example.com"
+--     },
+--     {
+--       "name": "Bob",
+--       "email": "bob@example.com"
+--     }
+--   ]
+-- }
+
+
+type alias Location =
+    { city : String
+    , country : String
+    }
+
+
+type alias Attendee =
+    { name : String
+    , email : String
+    }
+
+
+type alias EventDetails =
+    { date : String
+    , location : Location
+    }
+
+
+type alias Event =
+    { eventName : String
+    , details : EventDetails
+    , attendees : List Attendee
+    }
+
+
+eventDecoder : Decode.Decoder Event
+eventDecoder =
+    Decode.fail "implement event decoder"
