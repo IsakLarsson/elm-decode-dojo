@@ -2,44 +2,47 @@ module Tests exposing (..)
 
 import Decoders exposing (..)
 import Expect
-import Fuzz
 import Json.Decode as Decode
 import Test exposing (..)
 
 
-suite : Test
-suite =
-    describe "---- Testing decoders ----"
-        [ test "Decode simple person"
-            (\_ ->
-                let
-                    json =
-                        "{\"name\": \"Alice\", \"age\": 25}"
+simpleTest : String -> Decode.Decoder a -> String -> a -> Test
+simpleTest description decoder json expected =
+    test description <|
+        \_ ->
+            case Decode.decodeString decoder json of
+                Ok value ->
+                    Expect.equal value expected
 
-                    result =
-                        Decode.decodeString personDecoder json
-                in
-                case result of
-                    Ok person ->
-                        Expect.equal person (Person "Alice" 25)
+                Err err ->
+                    Expect.fail ("Failed to decode: " ++ Debug.toString err)
 
-                    Err _ ->
-                        Expect.fail "Failed to decode simple person"
-            )
-        , test "Decode optional field"
-            (\_ ->
-                let
-                    json =
-                        "{ \"name\": \"Bob\", \"age\": 30, \"nickname\": null }"
 
-                    result =
-                        Decode.decodeString personWithOptionalFieldDecoder json
-                in
-                case result of
-                    Ok person ->
-                        Expect.equal person (PersonWithOptionalField "Bob" 30 Nothing)
-
-                    Err _ ->
-                        Expect.fail "Failed to decode person with optional field"
-            )
+tests : Test
+tests =
+    describe "Decoding Tests"
+        [ simpleTest "Decode simple person"
+            personDecoder
+            "{ \"name\": \"Alice\", \"age\": 25 }"
+            (Person "Alice" 25)
+        , simpleTest "Decode person with nickname"
+            personWithOptionalFieldDecoder
+            "{ \"name\": \"Bob\", \"age\": 30, \"nickname\": null }"
+            (PersonWithOptionalField "Bob" 30 Nothing)
+        , simpleTest "Decode nested book"
+            bookDecoder
+            "{ \"title\": \"The Great Gatsby\", \"author\": { \"name\": \"F. Scott Fitzgerald\", \"born\": 1896 } }"
+            (Book "The Great Gatsby" (Author "F. Scott Fitzgerald" 1896))
+        , simpleTest "Decode playlist"
+            playlistDecoder
+            "{ \"playlistName\": \"Chill Beats\", \"songs\": [ { \"title\": \"Lofi Song 1\", \"duration\": 120 }, { \"title\": \"Lofi Song 2\", \"duration\": 150 } ] }"
+            (Playlist "Chill Beats" [ Song "Lofi Song 1" 120, Song "Lofi Song 2" 150 ])
+        , simpleTest "Decode result (success)"
+            resultDecoder
+            "{ \"status\": \"success\", \"data\": { \"value\": 42 } }"
+            (Success 42)
+        , simpleTest "Decode user with custom transformation"
+            userDecoder
+            "{ \"firstName\": \"Charlie\", \"lastName\": \"Brown\" }"
+            (User "Charlie Brown")
         ]
