@@ -191,7 +191,7 @@ playListWithOptionalArtistsDecoder =
 
 
 
--- LEVEL 9: One-Of Nested Structure
+-- LEVEL 8: One-Of Nested Structure
 -- JSON:
 -- {
 --   "category": "Books",
