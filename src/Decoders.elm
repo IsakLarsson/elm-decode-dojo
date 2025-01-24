@@ -15,7 +15,9 @@ type alias Person =
 
 personDecoder : Decode.Decoder Person
 personDecoder =
-    Decode.fail "Implement person decoder"
+    Decode.map2 Person
+        (Decode.field "name" Decode.string)
+        (Decode.field "age" Decode.int)
 
 
 
@@ -30,7 +32,10 @@ type alias PersonWithOptionalField =
 
 personWithOptionalFieldDecoder : Decode.Decoder PersonWithOptionalField
 personWithOptionalFieldDecoder =
-    Decode.fail "Implement person with optional field decoder"
+    Decode.map3 PersonWithOptionalField
+        (Decode.field "name" Decode.string)
+        (Decode.field "age" Decode.int)
+        (Decode.field "nickname" <| Decode.maybe Decode.string)
 
 
 
@@ -49,9 +54,18 @@ type alias Author =
     { name : String, born : Int }
 
 
+authorDecoder : Decode.Decoder Author
+authorDecoder =
+    Decode.map2 Author
+        (Decode.field "name" Decode.string)
+        (Decode.field "born" Decode.int)
+
+
 bookDecoder : Decode.Decoder Book
 bookDecoder =
-    Decode.fail "Implement book decoder"
+    Decode.map2 Book
+        (Decode.field "title" Decode.string)
+        (Decode.field "author" authorDecoder)
 
 
 
@@ -79,12 +93,16 @@ type alias Song =
 
 songDecoder : Decode.Decoder Song
 songDecoder =
-    Decode.fail "Implement song decoder"
+    Decode.map2 Song
+        (Decode.field "title" Decode.string)
+        (Decode.field "duration" Decode.int)
 
 
 playlistDecoder : Decode.Decoder Playlist
 playlistDecoder =
-    Decode.fail "Implement playlist decoder"
+    Decode.map2 Playlist
+        (Decode.field "playlistName" Decode.string)
+        (Decode.field "songs" <| Decode.list songDecoder)
 
 
 
@@ -95,14 +113,28 @@ playlistDecoder =
 -- { "status": "error", "message": "Something went wrong" }
 
 
-type Result
+type ResultType
     = Success Int
     | Error String
 
 
-resultDecoder : Decode.Decoder Result
+resultDecoder : Decode.Decoder ResultType
 resultDecoder =
-    Decode.fail "Implement Result decoder"
+    Decode.field "status" Decode.string
+        |> Decode.andThen
+            (\status ->
+                case status of
+                    "success" ->
+                        Decode.at [ "data", "value" ] Decode.int
+                            |> Decode.map Success
+
+                    "error" ->
+                        Decode.at [ "message" ] Decode.string
+                            |> Decode.map Error
+
+                    _ ->
+                        Decode.fail ("unexpected status " ++ status)
+            )
 
 
 
@@ -118,7 +150,9 @@ type alias User =
 
 userDecoder : Decode.Decoder User
 userDecoder =
-    Decode.fail "Implement User decoder"
+    Decode.map2 (\first last -> User (first ++ " " ++ last))
+        (Decode.field "firstName" Decode.string)
+        (Decode.field "lastName" Decode.string)
 
 
 
@@ -141,9 +175,19 @@ type alias PlayListWithOptionalArtist =
     { playListName : String, songs : List SongWithOptionalArtist }
 
 
+songWithOptionalArtistDecoder : Decode.Decoder SongWithOptionalArtist
+songWithOptionalArtistDecoder =
+    Decode.map3 SongWithOptionalArtist
+        (Decode.field "title" Decode.string)
+        (Decode.field "duration" Decode.int)
+        (Decode.field "artist" <| Decode.maybe Decode.string)
+
+
 playListWithOptionalArtistsDecoder : Decode.Decoder PlayListWithOptionalArtist
 playListWithOptionalArtistsDecoder =
-    Decode.fail "Implement playListWithOptionalArtistsDecoder"
+    Decode.map2 PlayListWithOptionalArtist
+        (Decode.field "playlistName" Decode.string)
+        (Decode.field "songs" <| Decode.list songWithOptionalArtistDecoder)
 
 
 
@@ -191,9 +235,26 @@ type alias Category =
     }
 
 
+authorWithOptionalBirthYearDecoder : Decode.Decoder AuthorWithOptionalBirthYear
+authorWithOptionalBirthYearDecoder =
+    Decode.map2 AuthorWithOptionalBirthYear
+        (Decode.field "name" Decode.string)
+        (Decode.field "born" <| Decode.maybe Decode.int)
+
+
+bookItemDecoder : Decode.Decoder BookItem
+bookItemDecoder =
+    Decode.map3 BookItem
+        (Decode.field "title" Decode.string)
+        (Decode.field "author" <| authorWithOptionalBirthYearDecoder)
+        (Decode.field "tags" <| Decode.list Decode.string)
+
+
 categoryDecoder : Decode.Decoder Category
 categoryDecoder =
-    Decode.fail "implement Category decoder"
+    Decode.map2 Category
+        (Decode.field "category" Decode.string)
+        (Decode.field "items" <| Decode.list bookItemDecoder)
 
 
 
@@ -245,6 +306,30 @@ type alias Event =
     }
 
 
+detailsDecoder : Decode.Decoder EventDetails
+detailsDecoder =
+    Decode.map2 EventDetails
+        (Decode.field "date" Decode.string)
+        (Decode.field "location" locationDecoder)
+
+
+locationDecoder : Decode.Decoder Location
+locationDecoder =
+    Decode.map2 Location
+        (Decode.field "city" Decode.string)
+        (Decode.field "country" Decode.string)
+
+
+attendeeDecoder : Decode.Decoder Attendee
+attendeeDecoder =
+    Decode.map2 Attendee
+        (Decode.field "name" Decode.string)
+        (Decode.field "email" Decode.string)
+
+
 eventDecoder : Decode.Decoder Event
 eventDecoder =
-    Decode.fail "implement event decoder"
+    Decode.map3 Event
+        (Decode.field "event" Decode.string)
+        (Decode.field "details" detailsDecoder)
+        (Decode.field "attendees" <| Decode.list attendeeDecoder)
