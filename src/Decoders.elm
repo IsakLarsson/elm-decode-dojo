@@ -15,9 +15,7 @@ type alias Person =
 
 personDecoder : Decode.Decoder Person
 personDecoder =
-    Decode.map2 Person
-        (Decode.field "name" Decode.string)
-        (Decode.field "age" Decode.int)
+    Decode.fail "Implement person decoder"
 
 
 
@@ -32,10 +30,7 @@ type alias PersonWithOptionalField =
 
 personWithOptionalFieldDecoder : Decode.Decoder PersonWithOptionalField
 personWithOptionalFieldDecoder =
-    Decode.map3 PersonWithOptionalField
-        (Decode.field "name" Decode.string)
-        (Decode.field "age" Decode.int)
-        (Decode.field "nickname" (Decode.maybe Decode.string))
+    Decode.fail "Implement person with optional field decoder"
 
 
 
